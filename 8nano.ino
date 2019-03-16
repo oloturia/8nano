@@ -8,7 +8,8 @@
  * 
  */
 
-#include <HIH61XX.h>         // HIH61XX humidity thermometer
+#include <HIH61xx.h>         // HIH61XX humidity thermometer
+#include <AsyncDelay.h>      // library used by HIH61XX for intervals
 #include <Adafruit_BMP280.h> // BMP280 thermo barometer
 #include <D7S.h>             // D7S accelerometer
 #include <DS1302.h>          // DS1302 Real-Time Clock
@@ -35,7 +36,8 @@ const int photo_pin = 6;
 Adafruit_BMP280 bme;
 
 //HIH61XX humidity thermometer, address 0x27
-HIH61XX hih(0x27);
+HIH61xx<TwoWire> hih(Wire);
+AsyncDelay samplingInterval;
 
 
 unsigned long previousMillis = 0;
@@ -91,7 +93,10 @@ void setup() {
   pinMode(photo_pin,OUTPUT);
 
   //start HIH61XX
-  hih.start();
+  Wire.begin();
+  hih.initialise();
+  samplingInterval.start(3000, AsyncDelay::MILLIS);
+  Serial.println("HIH61xx initialized");
 
   //start D7S
   D7S.begin();
@@ -115,12 +120,13 @@ void loop() {
     previousMillis += delayMillis;
     
     //BMP280
-    float temperature = bme.readTemperature();
+    
     float pressure = bme.readPressure();
 
-    //HIH61XX
-    hih.update();
-    float humidity = hih.humidity();
+    //HIH61xx
+    hih.read();
+    float humidity = hih.getRelHumidity()/100.0;
+    float temperature = hih.getAmbientTemp()/100.0;
     
     dataFile = SD.open("weather.csv", FILE_WRITE);
     if(dataFile){
