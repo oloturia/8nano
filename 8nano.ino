@@ -1,10 +1,6 @@
 /*
- * 8 nano - last rev.20 feb 2019
- * 
- * DS1302_Serial_Easy 
- * Copyright (C)2015 by Rinky-Dink Electronics, Henning Karlsen. All rights reserved.
- * web: http://www.RinkyDinkElectronics.com/
- * 
+ * 8 nano - last rev.17 mar 2019
+ * by oloturia
  * 
  */
 
@@ -24,7 +20,7 @@ const int CERTC = 10;
 DS1302 rtc(CERTC, IORTC, SCLKRTC);
 
 //SD Card
-const int chipSelect = 7;
+const int chipSelect = 4;
 File dataFile;
 
 //Photoresistor
@@ -39,6 +35,10 @@ Adafruit_BMP280 bme;
 HIH61xx<TwoWire> hih(Wire);
 AsyncDelay samplingInterval;
 
+//D7S, address 0x55
+float istPGA;
+float prevPGA = 0;
+float istSI;
 
 unsigned long previousMillis = 0;
 const unsigned long delayMillis = 10000; //one minute interval
@@ -98,6 +98,13 @@ void setup() {
   samplingInterval.start(3000, AsyncDelay::MILLIS);
   Serial.println("HIH61xx initialized");
 
+  //start bmp280
+  if(!bme.begin()) {
+    Serial.println("BMP280 sensor not found");
+  } else {
+    Serial.println("BMP280 sensor found");
+  }
+
   //start D7S
   D7S.begin();
   while(!D7S.isReady()) {
@@ -152,16 +159,22 @@ void loop() {
   }
   
   if(D7S.isEarthquakeOccuring()){
-    float istPGA = D7S.getInstantaneusSI();
-    dataFile = SD.open("earthquakes.csv", FILE_WRITE);
-    if(dataFile){
-      String tempString = queryData()+String(istPGA);
-      dataFile.println(tempString);
-      Serial.print(tempString);
-    } else {
-      Serial.println("error opening earthquakes.csv");
+    istPGA = D7S.getInstantaneusSI();
+    istSI = D7S.getInstantaneusSI();
+    if(istPGA > prevPGA){
+      prevPGA = istPGA;
+      dataFile = SD.open("quakes.csv", FILE_WRITE);
+      if(dataFile){
+        String tempString = queryData()+String(istPGA)+","+String(istSI);
+        dataFile.println(tempString);
+        Serial.print(tempString);
+      } else {
+        Serial.println("error opening earthquakes.csv");
+      }
+      dataFile.close();
     }
-    dataFile.close();
+  } else {
+    prevPGA = 0;
   }
   
 }
