@@ -126,8 +126,7 @@ void loop() {
   if(millis()-previousMillis > delayMillis) {
     previousMillis += delayMillis;
     
-    //BMP280
-    
+    //BMP280 
     float pressure = bme.readPressure();
 
     //HIH61xx
@@ -157,7 +156,9 @@ void loop() {
     }
     
   }
-  
+
+
+  //D7S, it records the maximum PGA detected during the earthquake
   if(D7S.isEarthquakeOccuring()){
     istPGA = D7S.getInstantaneusSI();
     istSI = D7S.getInstantaneusSI();
@@ -167,7 +168,7 @@ void loop() {
       if(dataFile){
         String tempString = queryData()+String(istPGA)+","+String(istSI);
         dataFile.println(tempString);
-        Serial.print(tempString);
+        Serial.println(tempString);
       } else {
         Serial.println("error opening earthquakes.csv");
       }
