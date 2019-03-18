@@ -170,7 +170,7 @@ void loop() {
         dataFile.println(tempString);
         Serial.println(tempString);
       } else {
-        Serial.println("error opening earthquakes.csv");
+        Serial.println("error opening quakes.csv");
       }
       dataFile.close();
     }
