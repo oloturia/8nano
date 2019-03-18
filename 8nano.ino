@@ -33,7 +33,7 @@ Adafruit_BMP280 bme;
 
 //HIH61XX humidity thermometer, address 0x27
 HIH61xx<TwoWire> hih(Wire);
-AsyncDelay samplingInterval;
+//AsyncDelay samplingInterval;
 
 //D7S, address 0x55
 float istPGA;
@@ -95,7 +95,7 @@ void setup() {
   //start HIH61XX
   Wire.begin();
   hih.initialise();
-  samplingInterval.start(3000, AsyncDelay::MILLIS);
+ // samplingInterval.start(3000, AsyncDelay::MILLIS);
   Serial.println("HIH61xx initialized");
 
   //start bmp280
