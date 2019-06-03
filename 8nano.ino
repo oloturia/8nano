@@ -160,7 +160,7 @@ void loop() {
 
   //D7S, it records the maximum PGA detected during the earthquake
   if(D7S.isEarthquakeOccuring()){
-    istPGA = D7S.getInstantaneusSI();
+    istPGA = D7S.getInstantaneusPGA();
     istSI = D7S.getInstantaneusSI();
     if(istPGA > prevPGA){
       prevPGA = istPGA;
